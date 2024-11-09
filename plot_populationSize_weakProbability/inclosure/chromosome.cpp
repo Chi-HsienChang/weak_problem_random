@@ -161,7 +161,7 @@ void Chromosome::evaluate() {
         accum = mkTrap(1, 0.8);
         break;
     case CYCTRAP:
-        accum = cycTrap(1, 0.8);
+        accum = cycTrap(6, 3);
         break;
     case FTRAP:
         accum = fTrap();
@@ -227,14 +227,90 @@ double Chromosome::nkFitness() const {
 
 // OneMax
 double Chromosome::oneMax () const {
+    double fHigh = 6;
+    double fLow = 3;
+    int i, j;
+    int u;
+    int TRAP_M = length / (TRAP_K-1);
+    if (length % (TRAP_K-1) != 0)
+        outputErrMsg ("TRAP_k doesn't divide length for Cyclic Setting");
+    double result = 0;
+   
+    for (i = 0; i < TRAP_M; i++) {
+        u = 0;
+        int idx = i * TRAP_K - i;
+        for (j = 0; j < TRAP_K; j++) {
+            int pos = idx + j;
+            if (pos == length)
+                pos = 0;
+            else if (pos > length)
+                outputErrMsg ("CYCLIC BUG");
+            //
+            u += getVal(pos);
+        }
+        result += trap (u, fHigh, fLow, TRAP_K);
+    }
 
-    double result = 0.0;
-
-    for (int i = 0; i < length; ++i)
-        result += getVal(i);
+    
 
     return result;
 }
+
+
+double Chromosome::trap (int unitary, double fHigh, double fLow, int trapK) const {
+    // if (unitary > trapK)
+    //     return 0;
+
+    // cout << "resultOOOOOO: " << endl;
+
+    if (unitary == 4)
+        return 6;
+    if (unitary == 0)
+        return 3;
+    if (unitary == 1)
+        return 2;
+    if (unitary == 2)
+        return 1;
+    if (unitary == 3)
+        return 0;
+    else
+        return 0;
+
+
+    // else
+    //     return fLow - unitary * fLow / (trapK-1);
+}
+
+double Chromosome::cycTrap(double fHigh, double fLow) const {
+    int i, j;
+    int u;
+    int TRAP_M = length / (TRAP_K-1);
+    if (length % (TRAP_K-1) != 0)
+        outputErrMsg ("TRAP_k doesn't divide length for Cyclic Setting");
+    double result = 0;
+   
+    for (i = 0; i < TRAP_M; i++) {
+        u = 0;
+        int idx = i * TRAP_K - i;
+        for (j = 0; j < TRAP_K; j++) {
+            int pos = idx + j;
+            if (pos == length)
+                pos = 0;
+            else if (pos > length)
+                outputErrMsg ("CYCLIC BUG");
+            //
+            u += getVal(pos);
+        }
+        result += trap (u, fHigh, fLow, TRAP_K);
+    }
+
+    cout << "resultCCCCCCCCCC" << result << endl;
+    
+    return result;
+}
+
+
+
 
 bool Chromosome::operator== (const Chromosome& c) const {
     if (length != c.length)
@@ -265,15 +341,7 @@ Chromosome& Chromosome::operator= (const Chromosome& c) {
     return *this;
 }
 
-double Chromosome::trap (int unitary, double fHigh, double fLow, int trapK) const {
-    if (unitary > trapK)
-        return 0;
 
-    if (unitary == trapK)
-        return fHigh;
-    else
-        return fLow - unitary * fLow / (trapK-1);
-}
 
 
 double Chromosome::niah (int unitary, double fHigh, double fLow, int trapK) const {
@@ -315,29 +383,6 @@ double Chromosome::fTrap() const {
     return result;
 }
 
-double Chromosome::cycTrap(double fHigh, double fLow) const {
-    int i, j;
-    int u;
-    int TRAP_M = length / (TRAP_K-1);
-    if (length % (TRAP_K-1) != 0)
-        outputErrMsg ("TRAP_k doesn't divide length for Cyclic Setting");
-    double result = 0;
-    for (i = 0; i < TRAP_M; i++) {
-        u = 0;
-        int idx = i * TRAP_K - i;
-        for (j = 0; j < TRAP_K; j++) {
-            int pos = idx + j;
-            if (pos == length)
-                pos = 0;
-            else if (pos > length)
-                outputErrMsg ("CYCLIC BUG");
-            //
-            u += getVal(pos);
-        }
-        result += trap (u, fHigh, fLow, TRAP_K);
-    }
-    return result;
-}
 
 
 
@@ -359,6 +404,8 @@ double Chromosome::mkTrap (double fHigh, double fLow) const {
 
         result += trap (u, fHigh, fLow, TRAP_K);
     }
+
+    cout << "result:!!!!!!!!!! " << result << endl;
 
     return result;
 }
@@ -612,7 +659,7 @@ void Chromosome::evaluate_inclosure(int function){
         accum = mkTrap(1, 0.8);
         break;
     case CYCTRAP:
-        accum = cycTrap(1, 0.8);
+        accum = cycTrap(6, 3);
         break;
     case FTRAP:
         accum = fTrap();
@@ -647,8 +694,8 @@ double Chromosome::evaluate_inclosure2(int function){
     case MKTRAP:
         accum = mkTrap(1, 0.8);
         break;
-    case CYCTRAP:
-        accum = cycTrap(1, 0.8);
+    case CYCTRAP: // modify 1109
+        accum = cycTrap(6, 3);
         break;
     case FTRAP:
         accum = fTrap();

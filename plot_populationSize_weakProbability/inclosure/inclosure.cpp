@@ -98,18 +98,22 @@ std::vector<int> Inclosure::run(){
         seed++;
     }
 
-    int test_problem_debug = 0;
+    int test_problem_debug = 1;
 
     if (test_problem_debug){
 
 
         //trap debug
-        // one max with one epi debug
+        // ############################
         unsigned long enum_size = std::pow(2, ell);
 
         for(unsigned long i=0; i< std::pow(2, ell); i++) { 
             // double fit = dis(gen);
-            double fit = buffer[i].evaluate_inclosure2(1);
+            // double fit = buffer[i].evaluate_inclosure2(2);
+            double fit = buffer[i].evaluate_inclosure2(0);
+            // cout << "fit: " << fit << endl;
+            // cout << "buffer: " << buffer[i].getGene(0) << endl;
+
             buffer[i].set_fitness(fit);
             fitness[i] = fit;
             count_chrom[buffer[i].getGene(0)]++;
@@ -118,11 +122,14 @@ std::vector<int> Inclosure::run(){
 
         std::sort(buffer.begin(), buffer.end(), Inclosure::customSortfitness); 
         dumpbuffer();
+        // ############################
 
 
 
 
         // one max with one epi debug
+        // ############################
+
         // unsigned long enum_size = std::pow(2, ell);
 
         // for(unsigned long i=0; i< std::pow(2, ell); i++) { 
@@ -145,6 +152,8 @@ std::vector<int> Inclosure::run(){
         // fitness[enum_size-2] = 0;
         // std::cout<<" buffer[enum_size-1].set_fitness(0): "<< fitness[enum_size-2] <<std::endl;
         // dumpbuffer();
+        // ############################
+
 
     }else{
 

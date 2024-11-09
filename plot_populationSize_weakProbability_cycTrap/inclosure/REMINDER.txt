@@ -1,0 +1,5 @@
+# in MSO.cpp flipMSO
+Why trail need to be constrained under ell/2
+
+# ./sweep 
+step is multiply by 10 every fail

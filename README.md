@@ -16,7 +16,7 @@ Others remains unchanged.
 1110 -> 0
 
 
-labadmin@TeilCluster:~/salima/weak_problem_random/plot_populationSize_weakProbability/inclosure$ ./inclosure 9 1 0 1 -1 9 > debug.txt
+labadmin@TeilCluster:~/salima/weak_problem_random/plot_populationSize_weakProbability_cycTrap/inclosure$ ./inclosure 9 1 0 1 -1 9 > debug.txt
 
 
 在chromosome.cpp中

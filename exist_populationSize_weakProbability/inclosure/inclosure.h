@@ -41,7 +41,7 @@ public:
      * 5. If non-weak, examine if evrey inclosure for each loci is SO/
      * 6. If inclosure is SO, examine if inclousure MSO. 
      */
-    std::vector<int> run();
+    std::vector<pair<double, double>> run();
 
     /**
      * @brief Execute run() for n times, and calculate the total number of weak, SO, MSO, etc..

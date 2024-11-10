@@ -1,0 +1,31 @@
+ell: 10, runs: 1, GHC: 0, debug: 0, seed: -1, sample_size: 10
+2^1: -nan -nan -nan -nan -nan -nan -nan -nan 
+overall ratio = -nan
+Complete
+2^2: -nan -nan -nan -nan -nan -nan -nan -nan 
+overall ratio = -nan
+Complete
+2^3: -nan -nan -nan -nan -nan -nan -nan -nan 
+overall ratio = -nan
+Complete
+2^4: -nan -nan -nan -nan -nan -nan -nan -nan 
+overall ratio = -nan
+Complete
+2^5: -nan -nan -nan -nan -nan -nan -nan -nan 
+overall ratio = -nan
+Complete
+2^6: -nan -nan -nan -nan -nan -nan -nan -nan 
+overall ratio = -nan
+Complete
+2^7: -nan -nan -nan -nan -nan -nan -nan -nan 
+overall ratio = -nan
+Complete
+2^8: 0.000000 0.000000 0.000000 0.000000 -nan -nan -nan -nan 
+overall ratio = 0.000000
+Complete
+2^9: 1.000000 0.166667 0.000000 0.000000 -nan -nan -nan -nan 
+overall ratio = 0.576923
+Complete
+2^10: 0.750000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 -nan 
+overall ratio = 0.049180
+Complete

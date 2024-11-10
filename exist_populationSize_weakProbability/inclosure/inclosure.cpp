@@ -1,9 +1,9 @@
 #include "inclosure.h"
-
+#include <ctime> // 引入 time 函數的標頭
 
 
 Inclosure::Inclosure(int ell_, int n_, int GHC_, int debug_, int seed_, int sample_size_):
-ell(ell_), n(n_), GHC(GHC_), debug(debug_), seed(seed_), sample_size(sample_size_)
+ell(ell_), n(n_), GHC(GHC_), debug(debug_), seed(static_cast<int>(time(nullptr))), sample_size(sample_size_)
 {
     unsigned long poschromosome = std::pow(2, ell);
     graph = new bool*[ell];
@@ -24,36 +24,67 @@ Inclosure::~Inclosure(){
 
 void Inclosure::execute(){
 
-    std::vector<int> total_weak(ell, 0);
-    std::vector<int> onetime_weak(ell, 0);
+
+    std::vector<std::pair<double, double>> pair_count(ell);
+
+    std::vector<double> one_weak(ell, 0);
+    std::vector<double> one_weak2(ell, 0);
+    std::vector<double> weak_ratio_base_epi(ell, 0);
 
     for (int i=0; i<n; i++){
         if(debug) printf("----------------New run----------------\n");
-        onetime_weak = run();
+        pair_count = run();
         for(int j=1; j<ell; j++){
-            if(debug) printf("Onetime epi_sizw %u # = %u\n", j, onetime_weak[j]);
-            total_weak[j] += onetime_weak[j];
+            // if(debug) printf("Onetime epi_sizw %u # = %u\n", j, onetime_weak[j]);
+            one_weak[j] += pair_count[j].first;
+            one_weak2[j] += pair_count[j].second;
+
+            // cout << "one_weak[" << j << "] = " << one_weak[j] << endl;
+            // cout << "one_epi[" << j << "] = " << one_weak2[j] << endl;
         }
+
+
     }
 
     if(debug) printf("----------------Total runs----------------\n");
     if(debug) {
-        for(int epi_size=1; epi_size<ell; epi_size++)
-        {
-            printf("Total epi_sizw %u # = %u\n", epi_size, total_weak[epi_size]);
-        }
+        // for(int epi_size=1; epi_size<ell; epi_size++)
+        // {
+        //     printf("Total epi_sizw %u # = %u\n", epi_size, total_weak[epi_size]);
+        // }
     }else{
-        for(int epi_size=1; epi_size<ell; epi_size++)
+
+
+        for(int epi_size=2; epi_size<ell; epi_size++)
         {
-            printf("%u ", total_weak[epi_size]);
+            // cout << "weak " << epi_size << " have " << one_weak[epi_size] << endl;
+            // cout << "epi " << epi_size << " have " << one_weak2[epi_size] << endl;
+            // weak_ratio_base_epi[epi_size] = one_weak[epi_size] / one_weak2[epi_size];
+            // printf("%f ", weak_ratio_base_epi[epi_size]);
         }
+
+        double total_ratio = 0;
+        double total_weak = 0;
+        double total_epi = 0;
+
+        for(int epi_size=2; epi_size<ell; epi_size++)
+        {
+            cout << "|S|=" << epi_size << ": " << one_weak[epi_size] << "/" <<one_weak2[epi_size] << endl;
+            // cout << "epi " << epi_size << " have " <<  << endl;
+            weak_ratio_base_epi[epi_size] = one_weak[epi_size] / one_weak2[epi_size];
+            total_weak += one_weak[epi_size];
+            total_epi += one_weak2[epi_size];
+            printf("%f \n", weak_ratio_base_epi[epi_size]);
+        } 
+        total_ratio = total_weak / total_epi;
+        printf("\noverall ratio = %f\n", total_ratio);
     }
 
     // std::cout<<"EEEEEENNNNNNDDDDDD"<<std::endl;
 }
 
 
-std::vector<int> Inclosure::run(){
+std::vector<pair<double, double>> Inclosure::run(){
 
     int t = std::pow(2, sample_size); // t是sample出來的chromosome數量
     if (debug) std::cout<<"sample "<<t<<" chromosome!!"<<std::endl;
@@ -61,7 +92,7 @@ std::vector<int> Inclosure::run(){
     if(debug){
         switch(GHC){
             case 0:
-                std::cout << "No GHC\n";
+                std::cout << "No GHC\n"; 
                 break;
             case 1:
                 std::cout << "One-bit GHC\n";
@@ -101,59 +132,6 @@ std::vector<int> Inclosure::run(){
     int test_problem_debug = 0;
 
     if (test_problem_debug){
-
-
-        //trap debug
-        // ############################
-        unsigned long enum_size = std::pow(2, ell);
-
-        for(unsigned long i=0; i< std::pow(2, ell); i++) { 
-            // double fit = dis(gen);
-            // double fit = buffer[i].evaluate_inclosure2(2);
-            double fit = buffer[i].evaluate_inclosure2(0);
-            // cout << "fit: " << fit << endl;
-            // cout << "buffer: " << buffer[i].getGene(0) << endl;
-
-            buffer[i].set_fitness(fit);
-            fitness[i] = fit;
-            count_chrom[buffer[i].getGene(0)]++;
-            seed++;
-        }  
-
-        std::sort(buffer.begin(), buffer.end(), Inclosure::customSortfitness); 
-        dumpbuffer();
-        // ############################
-
-
-
-
-        // one max with one epi debug
-        // ############################
-
-        // unsigned long enum_size = std::pow(2, ell);
-
-        // for(unsigned long i=0; i< std::pow(2, ell); i++) { 
-        //     // double fit = dis(gen);
-        //     double fit = buffer[i].evaluate_inclosure2(0);
-        //     buffer[i].set_fitness(fit);
-        //     fitness[i] = fit;
-        //     count_chrom[buffer[i].getGene(0)]++;
-        //     seed++;
-        // }  
-
-        // std::sort(buffer.begin(), buffer.end(), Inclosure::customSortfitness); 
-
-        // buffer[enum_size-1].set_fitness(1);
-        // std::cout<<" buffer[enum_size-1].set_fitness(1): "<< fitness[enum_size-1] <<std::endl;
-        // fitness[enum_size-1] = 1;
-        // std::cout<<" buffer[enum_size-1].set_fitness(1): "<< fitness[enum_size-1] <<std::endl;
-        // buffer[enum_size-2].set_fitness(0);
-        // std::cout<<" buffer[enum_size-1].set_fitness(0): "<< fitness[enum_size-2] <<std::endl;
-        // fitness[enum_size-2] = 0;
-        // std::cout<<" buffer[enum_size-1].set_fitness(0): "<< fitness[enum_size-2] <<std::endl;
-        // dumpbuffer();
-        // ############################
-
 
     }else{
 
@@ -202,8 +180,11 @@ std::vector<int> Inclosure::run(){
     }
 
     // 創立 weak_epi 的 vector >>> 裡面有 ell 個 vector >>> vector 裡面有 int 來統計 weak epi 的數量
+  
     std::vector<std::vector<std::vector<int>>> weak_epi(ell);
-    std::vector<int> one_weak(ell, 0); 
+    std::vector<double> one_weak(ell, 0); 
+    std::vector<std::vector<std::vector<int>>> weak_epi2(ell);
+    std::vector<double> one_weak2(ell, 0); 
 
     
     // 遍歷特定基因的組合，直到找到一個存在的基因為止
@@ -258,7 +239,9 @@ std::vector<int> Inclosure::run(){
             if(debug) printf("%u -> 0\n", u);
             std::vector<int> u_vector(1, u);
             weak_epi[1].push_back(u_vector);
+            weak_epi2[1].push_back(u_vector);
             one_weak[1]++;
+            one_weak2[1]++;
             
             graph[u][0] = true;
         }
@@ -266,7 +249,248 @@ std::vector<int> Inclosure::run(){
     }
 
 
+    // ####################################
 
+   // 遍歷所有組合可能
+    for (int epi_size = 2; epi_size < ell; epi_size++)
+    {  
+        auto combinations = generateCombinations(ell-1, epi_size); // combinations = { [1, 2], [1, 3], [2, 3] }
+        
+        for (auto& combination : combinations) // combination = [1, 2]
+        { 
+
+            bool not_find_smaller_epi = true;
+
+            // int smaller_epi_size = epi_size;
+            // bool is_subset;
+            // while(not_find_smaller_epi && smaller_epi_size>=2)
+            // {
+            //     for (auto& previous : weak_epi2[smaller_epi_size-1]) 
+            //     {
+            //         is_subset = isSubset(previous, combination);
+            //         not_find_smaller_epi = !is_subset;
+            //         if(is_subset) break;
+            //     }
+            //     smaller_epi_size--;
+            // }
+
+            
+            // std::cout<<"epi_size "<<epi_size<<std::endl;
+            // std::cout<<"not_find_smaller_epi "<<not_find_smaller_epi<<std::endl;
+            // 如果沒有找到更小的epi，則進入if >>> 這裡使用 weak 機制排除
+            if(not_find_smaller_epi)
+            {
+                // std::cout<<"enter if "<<std::endl;
+                auto enumerations = generateBinarySequences(epi_size); // enumerations = { [0, 0], [0, 1], [1, 0], [1, 1] }    
+
+                // 遍歷所有的 pattern 不用 remove best_sequence 的 pattern
+                for (auto& enumeration : enumerations) // combination = [1, 2] and enumeration_without_best = { [0, 0], [0, 1], [1, 0]}
+                { 
+                    auto enumeration_original = enumeration;
+
+                    // b is 主角pattern 出現 的 index
+                    b = b_original;
+
+                    int hit_original = 0; // 這個是用來計算有幾個相同的值
+                    while(1)
+                    {  
+                        if(b > (std::pow(2, ell)-1)) break;
+
+                        hit_original = 0;
+                        // combination 的角色是 index 的位置
+                        for(int i = 0; i < enumeration.size(); i++){
+                            if(buffer[b].getVal(combination[i]) == enumeration[i]) hit_original++; 
+                        }
+                        
+                        if(hit_original == epi_size) break;
+                        if(hit_original < epi_size) b++;    // b 不動 chrom_index chrom_index 往後移動
+                    }
+                    
+                    if(b > (std::pow(2, ell)-1)) break;
+
+                    if(count_chrom[buffer[b].getGene(0)] <= 0){
+                        // b is 主角pattern 出現 的 index
+                        // b = b_original;
+                        b = b + 1;
+                        int hit_original = 0; // 這個是用來計算有幾個相同的值
+                        while(1)
+                        {  
+                            if(b > (std::pow(2, ell)-1)) break;
+
+                            hit_original = 0;
+                            // combination 的角色是 index 的位置
+                            for(int i = 0; i < enumeration.size(); i++){
+                                if(buffer[b].getVal(combination[i]) == enumeration[i]) hit_original++; 
+                            }
+                            
+                            if(hit_original == epi_size) break;
+                            if(hit_original < epi_size) b++;    // b 不動 chrom_index chrom_index 往後移動
+                        }
+                        
+                        if(b > (std::pow(2, ell)-1)) break;
+                        if(count_chrom[buffer[b].getGene(0)] <= 0) break;
+                    }
+
+
+                    // 以當下 enumeration 為主角，去翻每一個 bit >>> 主角的 omega[0] != 去翻每一個omega[0] 這樣就有 epi >>> 就可以 break
+                    //// int chrom_index = b+1; // 從fitness第二高的chromosome開始找
+
+
+                    // chrom_index is 主角pattern flip 一個bit後 omega 的 index
+                    int chrom_index = b_original; // 從被sample到的最高fitness的chromosome開始找
+
+                    // 1102 應該不用
+                    // if(chrom_index > (std::pow(2, ell)-1)) break;     
+                    // while(count_chrom[buffer[chrom_index].getGene(0)] <= 0){
+                    //     chrom_index++;
+                    //     if(chrom_index > (std::pow(2, ell)-1)) break;
+                    // }
+
+
+                    // if(debug) printf("############## DEBUG ##############\n");
+                    
+                    int condition_holds = 0;
+                    for (int condition_index = 0; condition_index < enumeration.size(); condition_index++)
+                    {
+                        enumeration = enumeration_original;
+                        enumeration[condition_index] = 1 - enumeration[condition_index]; // flip bit 
+                        chrom_index = b_original; // 從頭開始找
+
+
+                        int hit = 0; // 這個是用來計算有幾個相同的值
+                        while(1)
+                        {  
+                            if(chrom_index > (std::pow(2, ell)-1)) break;
+
+                            hit = 0;
+                            // combination 的角色是 index 的位置
+                            for(int i = 0; i < enumeration.size(); i++){
+                                if(buffer[chrom_index].getVal(combination[i]) == enumeration[i]) hit++; 
+                            }
+                            
+                            if(hit == epi_size) break;
+                            if(hit < epi_size) chrom_index++;    // b 不動 chrom_index chrom_index 往後移動
+                        }
+                        
+                        if(chrom_index > (std::pow(2, ell)-1)) break;
+                        if(count_chrom[buffer[chrom_index].getGene(0)] <= 0) {
+                            // b is 主角pattern 出現 的 index
+                            // b = b_original;
+                            chrom_index = chrom_index + 1;
+                            int hit_original = 0; // 這個是用來計算有幾個相同的值
+                            while(1)
+                            {  
+                                if(chrom_index > (std::pow(2, ell)-1)) break;
+
+                                hit_original = 0;
+                                // combination 的角色是 index 的位置
+                                for(int i = 0; i < enumeration.size(); i++){
+                                    if(buffer[chrom_index].getVal(combination[i]) == enumeration[i]) hit_original++; 
+                                }
+                                
+                                if(hit_original == epi_size) break;
+                                if(hit_original < epi_size) chrom_index++;    
+                            }
+                            
+                            if(chrom_index > (std::pow(2, ell)-1)) break;
+                            if(count_chrom[buffer[chrom_index].getGene(0)] <= 0) break;                            
+                        }
+
+
+                        if((buffer[chrom_index].getVal(0) != buffer[b].getVal(0)) && count_chrom[buffer[chrom_index].getGene(0)] > 0)
+                        { 
+                            condition_holds += 1;
+                        }else{
+
+                            break; // 先不處理fitness相同的情況
+                            // Continue searching and put chromosomes with the same fitness as buffer[chrom_index].getVal(0) into a vector
+                            std::vector<int> same_fitness_indices;
+                            int next_index = chrom_index + 1;
+                            
+                            // same_fitness_indices.push_back(chrom_index);
+                            while (next_index < std::pow(2, ell) && buffer[next_index].getFitness() == buffer[chrom_index].getFitness()) {
+                                if (count_chrom[buffer[next_index].getGene(0)] > 0) {
+                                    same_fitness_indices.push_back(next_index);
+                                }
+                                next_index++;
+                            }
+
+                            int go_to_next_enumeration = 1;
+                            for (int idx : same_fitness_indices) {
+                                if (buffer[idx].getVal(0) != buffer[b].getVal(0)) {
+                                    condition_holds += 1;
+                                    go_to_next_enumeration = 0;
+                                    break;
+                                }
+                            }
+
+                            if (go_to_next_enumeration) {
+                                break;
+                            };
+
+                            // std::cout << "debug pattern is: ";
+                            // for(int p = enumeration.size()-1; p >= 0; p--){
+                            //     std::cout << enumeration[p] << " ";
+                            // }
+                            // std::cout << std::endl;
+                            
+                            // std::cout << buffer[chrom_index].getFitness() <<std::endl;
+                            
+                        }
+                    
+                    }
+
+                    if(condition_holds == epi_size)
+                    {
+                        one_weak2[epi_size]++;
+                        weak_epi2[epi_size].push_back(combination);
+
+
+                        
+                        if(debug){
+
+                            std::cout << "condition_holds is: "<< condition_holds << std::endl;
+                            
+
+
+                            std::cout << "!!!the pattern is: ";
+                            for(int p = enumeration_original.size()-1; p >= 0; p--){
+                                std::cout << enumeration_original[p] << " ";
+                            }
+                            std::cout << std::endl;
+                            // for(auto val : enumeration_original){
+                            //     std::cout << val << " ";
+                            // }
+                            // std::cout << std::endl;
+
+
+                            std::cout << "!!!the fitenss is: ";
+                            std::cout << buffer[b].getFitness() <<std::endl;
+
+
+
+
+                            printf("{ ");
+                            for (const auto& vertex : combination)
+                            {
+                                printf("%u ", vertex);
+                            }
+                            printf("} -> 0\n");
+                        }
+
+                        break;
+                    }
+
+                }
+            }
+
+        }
+    }
+   
+
+    // ####################################
+    // ####################################
+    // ####################################
 
     
     // 遍歷所有組合可能
@@ -507,7 +731,20 @@ std::vector<int> Inclosure::run(){
 
     // std::cout<<"END"<<std::endl;
 
-    return one_weak;
+    // std::vector<double> one_weak(ell, 0);  // weak 數量
+    // std::vector<double> one_weak2(ell, 0); // epi 數量
+
+
+
+    std::vector<std::pair<double, double>> pair_count(ell, std::make_pair(0.0, 0.0));
+
+    for(int i=1; i<ell; i++){
+        // cout << "one_weak[" << i << "] = " << one_weak[i] << endl;
+        // cout << "one_weak2[" << i << "] = " << one_weak2[i] << endl;
+        pair_count[i] = std::make_pair(one_weak[i], one_weak2[i]);
+    }
+
+    return pair_count;
 }
 
 

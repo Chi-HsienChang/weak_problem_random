@@ -31,7 +31,8 @@ for i in range(1, sample_size + 1):
 
     # 計算比例並加入 DataFrame
     proportions = [
-        float(count) / (comb(ell - 1, k + 1) * total_time) if comb(ell - 1, k + 1) != 0 else 0
+        # float(count) / (comb(ell - 1, k + 1) * total_time) if comb(ell - 1, k + 1) != 0 else 0
+        float(count) / 1 if 1 != 0 else 0
         for k, count in enumerate(counts)
     ]
     data[f'{2**i}'] = proportions
